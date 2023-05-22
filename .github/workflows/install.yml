@@ -1,6 +1,7 @@
 name: Install
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
