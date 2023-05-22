@@ -151,25 +151,30 @@ else()
 endif()
 
 if(SNOWPLOW_BUILD_TESTS)
-  add_executable(snowplow-tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/http/test_http_client.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/client_session_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/cracked_url_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/emitter/emitter_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/emitter/retry_delay_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/http/http_client_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/http/http_request_result_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/payload/payload_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/payload/event_payload_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/payload/self_describing_json_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/storage/sqlite_storage_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/subject_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/tracker_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/snowplow_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/integration_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/micro.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/utils_test.cpp)
+    add_executable(snowplow-tests
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/http/test_http_client.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/client_session_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/cracked_url_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/emitter/emitter_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/emitter/retry_delay_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/http/http_client_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/http/http_request_result_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/payload/payload_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/payload/event_payload_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/payload/self_describing_json_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/storage/sqlite_storage_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/subject_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/tracker_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/snowplow_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/integration_test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/micro.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/utils_test.cpp)
+
+    if (NOT WIN32)
+        find_package(CURL REQUIRED)
+        target_link_libraries(snowplow-tests CURL::libcurl)
+    endif ()
 
     target_link_libraries(snowplow-tests snowplow)
     set_target_properties(snowplow-tests PROPERTIES
