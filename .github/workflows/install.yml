@@ -10,14 +10,28 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
         build_shared_libs: [0, 1]
         system_curl_uuid: ["False"]
+        external_sqlite: [1]
         include:
+        # Extra Linux jobs for using system curl/libuuid
           - os: ubuntu-latest
             build_shared_libs: 0
             system_curl_uuid: "True"
           - os: ubuntu-latest
             build_shared_libs: 1
             system_curl_uuid: "True"
-    name: "${{ matrix.os }}: shared: ${{ matrix.build_shared_libs }}, system_curl_uuid ${{ matrix.system_curl_uuid }}"
+        # Extra jobs to test installer with SQLite3 compiled into Snowplow
+          - os: macos-latest
+            build_shared_libs: 1
+            system_curl_uuid: "False"
+            external_sqlite: 0
+          - os: windows-latest
+            build_shared_libs: 1
+            system_curl_uuid: "False"
+            external_sqlite: 0
+          - os: ubuntu-latest
+            build_shared_libs: 1
+            system_curl_uuid: "False"
+            external_sqlite: 0
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Conan
@@ -32,14 +46,14 @@ jobs:
         if: matrix.system_curl_uuid == 'True'
       - name: Create Conan default profile
         run: conan profile new default --detect
-      - name: Enable new gcc ABI
+      - name: Enable new gcc ABI for Conan builds
         run: conan profile update settings.compiler.libcxx=libstdc++11 default
         if: matrix.os == 'ubuntu-latest'
       - name: Install Snowplow dependencies with Conan
         run: conan install test/install -b missing -if i/cmake -pr:b=default -pr:h=default -s build_type=Debug -g=CMakeDeps -o system_curl_uuid=${{ matrix.system_curl_uuid }}
-      - name: Build and Install Snowplow
+      - name: Build and install Snowplow
         run: |
-          cmake -S . -B b1 -DCMAKE_INSTALL_PREFIX=i -DCMAKE_BUILD_TYPE=Debug -DSNOWPLOW_USE_EXTERNAL_JSON=1 -DSNOWPLOW_USE_EXTERNAL_SQLITE=1 -DSNOWPLOW_BUILD_TESTS=0 -DSNOWPLOW_BUILD_EXAMPLE=0 -DSNOWPLOW_BUILD_PERFORMANCE=0 -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=1 -DBUILD_SHARED_LIBS=${{ matrix.build_shared_libs }}
+          cmake -S . -B b1 -DCMAKE_INSTALL_PREFIX=i -DCMAKE_BUILD_TYPE=Debug -DSNOWPLOW_USE_EXTERNAL_JSON=1 -DSNOWPLOW_USE_EXTERNAL_SQLITE=${{ matrix.external_sqlite }} -DSNOWPLOW_BUILD_TESTS=0 -DSNOWPLOW_BUILD_EXAMPLE=0 -DSNOWPLOW_BUILD_PERFORMANCE=0 -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=1 -DBUILD_SHARED_LIBS=${{ matrix.build_shared_libs }}
           cmake --build b1 --target install --config Debug
       - name: Build the test project
         run: |

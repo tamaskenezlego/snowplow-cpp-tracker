@@ -87,8 +87,8 @@ else()
     if (NOT sqlite_amalgamation_POPULATED)
         FetchContent_Populate(sqlite_amalgamation)
     endif()
-    target_include_directories(snowplow PUBLIC ${sqlite_amalgamation_SOURCE_DIR})
-    target_sources(snowplow PUBLIC ${sqlite_amalgamation_SOURCE_DIR}/sqlite3.c)
+    target_include_directories(snowplow PRIVATE ${sqlite_amalgamation_SOURCE_DIR})
+    target_sources(snowplow PRIVATE ${sqlite_amalgamation_SOURCE_DIR}/sqlite3.c)
 endif()
 
 find_package(Threads)
@@ -112,7 +112,20 @@ if (NOT APPLE AND NOT WIN32)
 endif ()
 
 include(CMakePackageConfigHelpers)
-if(SNOWPLOW_USE_EXTERNAL_SQLITE AND SNOWPLOW_USE_EXTERNAL_JSON)
+
+set(create_install_target ON)
+
+if(NOT SNOWPLOW_USE_EXTERNAL_JSON)
+    set(create_install_target OFF)
+    message(STATUS "Install target not added because SNOWPLOW_USE_EXTERNAL_JSON is OFF")
+endif()
+
+if(NOT BUILD_SHARED_LIBS AND NOT SNOWPLOW_USE_EXTERNAL_SQLITE)
+    set(create_install_target OFF)
+    message(STATUS "Install target not added because SNOWPLOW_USE_EXTERNAL_SQLITE is OFF while building a static library (BUILD_SHARED_LIBS is OFF)")
+endif()
+
+if(create_install_target)
     install(TARGETS snowplow EXPORT snowplow-export
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
@@ -146,8 +159,6 @@ if(SNOWPLOW_USE_EXTERNAL_SQLITE AND SNOWPLOW_USE_EXTERNAL_JSON)
         install(FILES ${SNOWPLOW_CMAKE_DIR}/FindLibUUID.cmake
             DESTINATION lib/cmake/snowplow)
     endif()
-else()
-    message(STATUS "Install target not added because SNOWPLOW_USE_EXTERNAL_SQLITE or SNOWPLOW_USE_EXTERNAL_JSON is OFF")
 endif()
 
 if(SNOWPLOW_BUILD_TESTS)
