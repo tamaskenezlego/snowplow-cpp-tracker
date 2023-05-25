@@ -40,13 +40,7 @@ jobs:
       run: make
 
     - name: find snowplow-examples
-      run: |
-        echo "ls ."
-        ls .
-        echo "ls snowplow-example"
-        ls snowplow-example || echo "nothing here"
-        echo "ls examples"
-        ls examples || echo "nothing here"
+      run: find . -name snowplow-example
 
     - name: Run tests
       run: ./snowplow-tests
@@ -123,6 +117,9 @@ jobs:
 
     - name: make
       run: make
+
+    - name: find snowplow-examples
+      run: find . -name snowplow-example
 
     - name: Run tests
       run: ./snowplow-tests
